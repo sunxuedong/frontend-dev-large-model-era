@@ -9,54 +9,32 @@ const update = async () => {
   if (!question) return;
   content.value = "思考中...";
 
-  const endpoint = 'https://api.moonshot.cn/v1/chat/completions';
+  const endpoint = '/api/stream';
   const headers = {
     'Content-Type': 'application/json',
     Authorization: `Bearer ${import.meta.env.VITE_MOONSHOT_API_KEY}`
   };
 
-  console.log(question.value);
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers: headers,
-    body: JSON.stringify({
-      model: 'moonshot-v1-8k',
-      messages: [{ role: 'user', content: question.value }],
-      stream: stream.value,
-    })
-  });
-
   if (stream.value) {
-    const reader = response.body?.getReader();
-    const decoder = new TextDecoder();
-    let done = false;
-    let buffer = '';
     content.value = '';
-
-    while (!done) {
-      const { value, done: doneReading } = await (reader?.read() as Promise<{ value: any; done: boolean }>);
-      done = doneReading;
-      const chunkValue = buffer + decoder.decode(value);
-      buffer = '';
-
-      const lines = chunkValue.split('\n').filter((line) => line.startsWith('data: '));
-
-      for (const line of lines) {
-        const incoming = line.slice(6);
-        if (incoming === '[DONE]') {
-          done = true;
-          break;
-        }
-        try {
-          const data = JSON.parse(incoming);
-          const delta = data.choices[0].delta.content;
-          if (delta) content.value += delta;
-        } catch (ex) {
-          buffer += incoming;
-        }
-      }
-    }
+    const eventSource = new EventSource(`${endpoint}?question=${question.value}`);
+    eventSource.addEventListener("message", function (e: any) {
+      content.value += e.data || '';
+    });
+    eventSource.addEventListener('end', () => {
+      console.log('传输完成');
+      eventSource.close();
+    });
   } else {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({
+        model: 'moonshot-v1-8k',
+        messages: [{ role: 'user', content: question.value }],
+        stream: stream.value,
+      })
+    });
     const data = await response.json();
     content.value = data.choices[0].message.content;
   }

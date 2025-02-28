@@ -49,5 +49,101 @@
         "NODE_ENV": "development"
       }
     },
+    {
+      "name": "Server-Sent Events",
+      "type": "node",
+      "request": "launch",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "runtimeExecutable": "pnpm", // 使用 pnpm 作为运行时
+      "args": [
+        "dev"
+      ], // 执行 dev 命令
+      "cwd": "${workspaceFolder}/ai_sse", // 项目1路径
+      "env": {
+        "NODE_ENV": "development"
+      }
+    },
+    {
+      "name": "使用 Flux.ai 绘图",
+      "type": "node",
+      "request": "launch",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "runtimeExecutable": "pnpm", // 使用 pnpm 作为运行时
+      "args": [
+        "dev"
+      ], // 执行 dev 命令
+      "cwd": "${workspaceFolder}/flux_ai", // 项目1路径
+      "env": {
+        "NODE_ENV": "development"
+      }
+    },
+    {
+      "name": "使用可灵绘图",
+      "type": "node",
+      "request": "launch",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "runtimeExecutable": "pnpm", // 使用 pnpm 作为运行时
+      "args": [
+        "dev"
+      ], // 执行 dev 命令
+      "cwd": "${workspaceFolder}/kling_ai", // 项目1路径
+      "env": {
+        "NODE_ENV": "development"
+      }
+    },
+    {
+      "name": "使用豆包语音合成",
+      "type": "node",
+      "request": "launch",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "runtimeExecutable": "pnpm", // 使用 pnpm 作为运行时
+      "args": [
+        "dev"
+      ], // 执行 dev 命令
+      "cwd": "${workspaceFolder}/tts_demo", // 项目1路径
+      "env": {
+        "NODE_ENV": "development"
+      }
+    },
+    {
+      "name": "使用Kimi视觉模型",
+      "type": "node",
+      "request": "launch",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "runtimeExecutable": "pnpm", // 使用 pnpm 作为运行时
+      "args": [
+        "dev"
+      ], // 执行 dev 命令
+      "cwd": "${workspaceFolder}/kimi_vision_demo", // 项目1路径
+      "env": {
+        "NODE_ENV": "development"
+      }
+    },
+    {
+      "name": "使用模板引擎编译提示词",
+      "type": "node",
+      "request": "launch",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "runtimeExecutable": "pnpm", // 使用 pnpm 作为运行时
+      "args": [
+        "dev"
+      ], // 执行 dev 命令
+      "cwd": "${workspaceFolder}/about_today", // 项目1路径
+      "env": {
+        "NODE_ENV": "development"
+      }
+    },
   ]
 }
