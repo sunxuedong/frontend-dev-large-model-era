@@ -1,0 +1,53 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "使用 Deepseek API",
+      "type": "node",
+      "request": "launch",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "runtimeExecutable": "pnpm", // 使用 pnpm 作为运行时
+      "args": [
+        "dev"
+      ], // 执行 dev 命令
+      "cwd": "${workspaceFolder}/deepseek_basic", // 项目1路径
+      "env": {
+        "NODE_ENV": "development"
+      }
+    },
+    {
+      "name": "使用Coze",
+      "type": "node",
+      "request": "launch",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "runtimeExecutable": "pnpm", // 使用 pnpm 作为运行时
+      "args": [
+        "dev"
+      ], // 执行 dev 命令
+      "cwd": "${workspaceFolder}/coze_api", // 项目1路径
+      "env": {
+        "NODE_ENV": "development"
+      }
+    },
+    {
+      "name": "流式响应",
+      "type": "node",
+      "request": "launch",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "runtimeExecutable": "pnpm", // 使用 pnpm 作为运行时
+      "args": [
+        "dev"
+      ], // 执行 dev 命令
+      "cwd": "${workspaceFolder}/ai_streaming", // 项目1路径
+      "env": {
+        "NODE_ENV": "development"
+      }
+    },
+  ]
+}
