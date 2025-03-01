@@ -130,6 +130,22 @@
       }
     },
     {
+      "name": "拍照记单词",
+      "type": "node",
+      "request": "launch",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "runtimeExecutable": "pnpm", // 使用 pnpm 作为运行时
+      "args": [
+        "dev"
+      ], // 执行 dev 命令
+      "cwd": "${workspaceFolder}/capture_the_word", // 项目1路径
+      "env": {
+        "NODE_ENV": "development"
+      }
+    },
+    {
       "name": "使用模板引擎编译提示词",
       "type": "node",
       "request": "launch",
