@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { set, get } from 'jsonuri';
-import { marked } from 'marked';
 
 const question = ref('天空为什么是蓝色的？');
 const content = ref({
   title: "",
+  overview: "",
   outline: [],
   content: [],
 });
@@ -37,9 +37,10 @@ const update = async () => {
     <div class="output">
       <!-- <textarea>{{ content }}</textarea> -->
       <h1>{{ content.title }}</h1>
+      <p>{{ content.overview }}</p>
       <div v-for="(item, i) in (content.outline as any)" :key="item.title + i">
         <h2>{{ item.title }}</h2>
-        <p v-html=marked(content.content[i])></p>
+        <p>{{ content.content[i] }}</p>
       </div>
     </div>
   </div>

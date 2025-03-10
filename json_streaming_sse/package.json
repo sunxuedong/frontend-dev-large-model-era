@@ -1,5 +1,5 @@
 {
-  "name": "ai_streaming",
+  "name": "json_streaming_sse",
   "private": true,
   "version": "0.0.0",
   "type": "module",

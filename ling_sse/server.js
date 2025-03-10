@@ -49,6 +49,16 @@ const outlinePrompt = `
 }
 `;
 
+const overviewPrompt = `
+根据用户发送的文章标题撰写一段简短的概述。
+
+要求：
+文章的读者是6-8岁的儿童。
+文章的风格要符合儿童的阅读习惯，避免使用过于复杂的句子结构和词汇。
+文章的内容要围绕用户发送的文章标题进行，不要偏离主题。
+限制篇幅，不要超过1个自然段落，纯文本输出，不要加任何Markdown标签。
+`;
+
 const contentPrompt = `
 根据用户发送的文章标题和概述，撰写详细文章内容。
 
@@ -77,6 +87,17 @@ app.get('/stream', async (req, res) => {
     outlineBot.addPrompt(outlinePrompt);
 
     outlineBot.chat(question);
+
+    outlineBot.on('string-response', ({ uri, delta }) => {
+        console.log(uri, delta);
+        if (uri.startsWith('title')) {
+            const overviewBot = ling.createBot('overview', {}, {
+                response_format: { type: "text" },
+            });
+            overviewBot.addPrompt(overviewPrompt);
+            overviewBot.chat(delta);
+        }
+    });
 
     outlineBot.on('object-response', ({ uri, delta }) => {
         const matches = uri.match(/outline\/(\d+)/);

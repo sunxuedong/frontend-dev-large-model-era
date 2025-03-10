@@ -1,5 +1,5 @@
 {
-  "name": "ai_streaming",
+  "name": "ling_sse",
   "private": true,
   "version": "0.0.0",
   "type": "module",

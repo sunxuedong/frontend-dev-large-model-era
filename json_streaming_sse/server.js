@@ -8,9 +8,10 @@ dotenv.config({
 })
 
 const openaiApiKey = process.env.VITE_API_KEY;
+const endpoint = process.env.VITE_END_POINT;
+
 const app = express();
 const port = 3000;
-const endpoint = process.env.VITE_END_POINT;
 
 const systemPrompt = `
 你是一位亲子英语启蒙老师，负责设计家庭英语亲子英语例句。
