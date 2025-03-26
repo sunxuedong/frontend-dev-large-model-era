@@ -4,6 +4,7 @@ import MakeQuestion from './components/MakeQuestion.vue';
 import { marked } from 'marked';
 import BookCard from './components/BookCard.vue';
 import BookDetails from './components/BookDetails.vue';
+import { set, get } from 'jsonuri';
 
 const question = ref('天空为什么是蓝色的？');
 
@@ -47,6 +48,10 @@ const update = async () => {
 const coverUrl = ref('');
 const quickAnswer = ref('');
 const description = ref('');
+const details: any = { topics: [] };
+
+const topics: Ref<any[]> = ref([]);
+
 const questionSelected = (question: string, index: number) => {
   // console.log('questionSelected', question);
   // console.log('queries', queries[index]);
@@ -66,9 +71,15 @@ const questionSelected = (question: string, index: number) => {
     if (uri.endsWith('cover_image')) {
       coverUrl.value = delta;
     }
+    if (uri.startsWith('topics')) {
+      let content = get(details, uri) || '';
+      set(details, uri, content + delta);
+      topics.value = [...details.topics];
+    }
   });
   eventSource.addEventListener('finished', () => {
     console.log('传输完成');
+    // console.log(details);
     eventSource.close();
   });
 }
@@ -92,7 +103,7 @@ const showDetails = () => {
       <div v-html="marked.parse(quickAnswer)"></div>
       <BookCard :image="coverUrl" :description="description" :question="question" @expand="showDetails()" />
     </div>
-    <BookDetails :image="coverUrl" :expand="expand" :introduction="description" :question="question" />
+    <BookDetails :image="coverUrl" :expand="expand" :introduction="description" :question="question" :topics="topics" />
   </div>
 </template>
 

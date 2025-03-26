@@ -1,5 +1,14 @@
 <script setup lang="ts">
 import { marked } from 'marked';
+import { type PropType } from 'vue';
+
+interface Topic {
+    topic: string,
+    post_reading_question: string,
+    article_paragraph?: string,
+    image_prompt?: string,
+}
+
 defineProps({
     image: {
         type: String,
@@ -16,6 +25,10 @@ defineProps({
     expand: {
         type: Boolean,
         default: false,
+    },
+    topics: {
+        type: Array as PropType<Topic[]>,
+        default: [],
     }
 });
 </script>
@@ -28,6 +41,13 @@ defineProps({
         </div>
         <h1>{{ question }}</h1>
         <p class="introduction" v-html="marked.parse(introduction)"></p>
+        <div class="article">
+            <div v-for="topic in topics" class="topic">
+                <h3 class="topic-title">{{ topic.topic }}</h3>
+                <p class="article_paragraph" v-html="marked.parse(topic.article_paragraph || '')"></p>
+                <p class="post-reading-question">{{ topic.post_reading_question }}</p>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -40,6 +60,12 @@ defineProps({
     overflow-y: auto;
     background-color: white;
     box-shadow: #aaa 0px 0px 10px 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+    .details {
+        background-color: #333;
+    }
 }
 
 .cover {
@@ -60,5 +86,10 @@ defineProps({
     padding: 20px;
     font-size: 1rem;
     border-bottom: solid 1px #ccc;
+}
+
+.article {
+    padding: 20px;
+    text-align: start;
 }
 </style>

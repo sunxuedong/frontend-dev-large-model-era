@@ -5,6 +5,8 @@ import { type ChatConfig, Ling } from '@bearbobo/ling';
 import makeQuestionPrompt from './lib/prompts/make-question.tpl.ts';
 import quickAnswerPrompt from './lib/prompts/quick-answer.tpl.ts';
 import outlinePrompt from './lib/prompts/outline.tpl.ts';
+import subTopicsPrompt from './lib/prompts/sub-topics.tpl.ts';
+import articleTpl from './lib/prompts/article.tpl.ts';
 import bodyParser from 'body-parser';
 import { search } from './lib/service/serper.search.ts';
 import { generateImage } from './lib/service/generate-image.ts';
@@ -46,7 +48,9 @@ app.get('/generate', async (req, res) => {
     }
     // ------- The work flow start --------
     const ling = new Ling(config);
-    const quickAnswerBot = ling.createBot('quick-answer', {}, {
+    const quickAnswerBot = ling.createBot('quick-answer', {
+        max_tokens: 4096 * 4,
+    }, {
         response_format: { type: 'text' }
     });
     quickAnswerBot.addPrompt(quickAnswerPrompt, userConfig);
@@ -65,6 +69,37 @@ app.get('/generate', async (req, res) => {
         });
     });
 
+    outlineBot.addListener('inference-done', (content) => {
+        const outline = JSON.parse(content);
+        delete outline.image_prompt;
+
+        const bot = ling.createBot();
+        bot.addPrompt(subTopicsPrompt, userConfig);
+        bot.addFilter(/\/subtopics\//);
+
+        bot.chat(JSON.stringify(outline));
+
+        // 文章生成
+        bot.addListener('inference-done', (content) => {
+            const { topics } = JSON.parse(content);
+            // console.log(topics);
+            for (let i = 0; i < topics.length; i++) {
+                const topic = topics[i];
+
+                const bot = ling.createBot(`topics/${i}`);
+                bot.addPrompt(articleTpl, userConfig);
+                bot.addFilter({
+                    article_paragraph: true,
+                    image_prompt: true,
+                });
+                bot.addListener('inference-done', (content) => {
+                    console.log(JSON.parse(content));
+                });
+                bot.chat(JSON.stringify(topic));
+            }
+        });
+    });
+
     if (searchResults) {
         quickAnswerBot.addPrompt(`参考资料:\n${searchResults}`);
         outlineBot.addPrompt(`参考资料:\n${searchResults}`);
@@ -72,6 +107,12 @@ app.get('/generate', async (req, res) => {
 
     quickAnswerBot.chat(question);
     outlineBot.chat(question);
+
+    // ling.addListener('message', (data) => {
+    //     if (data.data.includes('2/article_paragraph')) {
+    //         console.log(data);
+    //     }
+    // });
 
     ling.close();
 

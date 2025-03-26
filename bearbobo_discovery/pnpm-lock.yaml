@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   '@bearbobo/ling':
-    specifier: ^0.9.1
-    version: 0.9.1
+    specifier: ^0.11.2
+    version: 0.11.2
   axios:
     specifier: ^1.8.3
     version: 1.8.3
@@ -93,8 +93,8 @@ packages:
       '@babel/helper-string-parser': 7.25.9
       '@babel/helper-validator-identifier': 7.25.9
 
-  /@bearbobo/ling@0.9.1:
-    resolution: {integrity: sha512-1YIzXIBZ9BmN5Ek8MH4sNnAUM2aXCk7KJkmVEMWiQ7IZ0HoZIOh+fH72ENLCutiM4/Fo5/3okIkfdLOVauW91A==}
+  /@bearbobo/ling@0.11.2:
+    resolution: {integrity: sha512-LYVnY/Hh0aiOVziDkE5fgTfnSSMiEcIexba/f17lmT0JIgh5KdZPKjkufxtU5qFgOH1fJGfhMGy7EQLhmQ/vQw==}
     dependencies:
       '@azure/openai': 2.0.0-beta.1
       lodash.merge: 4.6.2
