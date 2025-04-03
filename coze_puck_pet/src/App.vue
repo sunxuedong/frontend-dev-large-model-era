@@ -48,7 +48,7 @@ const uploadFile = async () => {
   return ret.data.id;
 }
 
-const style = ref('卡通');
+const style = ref('写实');
 const uniform_number = ref(10);
 const uniform_color = ref('红');
 const position = ref(0);
@@ -139,9 +139,10 @@ const generate = async () => {
         <div class="selection">
           <label>风格：</label>
           <select v-model="style">
-            <option value="卡通">卡通</option>
-            <option value="乐高">乐高</option>
             <option value="写实">写实</option>
+            <option value="乐高">乐高</option>
+            <option value="国漫">国漫</option>
+            <option value="日漫">日漫</option>
             <option value="油画">油画</option>
             <option value="涂鸦">涂鸦</option>
             <option value="素描">素描</option>
