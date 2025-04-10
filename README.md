@@ -1,4 +1,8 @@
-# 简介
-空工作区的空白模板，支持所有编程语言的运行时。
-## 帮助
-如果你需要帮助，你可以查看[文档](https://docs.marscode.cn/)，或向我们提供[反馈](https://juejin.cn/pin/club/7359094304150650889?utm_source=doc&utm_medium=marscode)。
+# 跟月影学前端智能体开发
+
+> 🔥 只讲干货，不整虚的
+
+这是专栏《跟月影学前端智能体开发》的配套实战练习。
+
+<img src="https://github.com/user-attachments/assets/1bbcd7fe-767e-4f5c-9c77-0749d67146bb" width="360">
+
