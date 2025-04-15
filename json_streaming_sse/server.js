@@ -112,7 +112,7 @@ app.get('/stream', async (req, res) => {
                     jsonParser.trace(delta);
                     // if (delta) res.write(`data: ${delta}\n\n`); // 发送数据到客户端
                 } catch (ex) {
-                    buffer += incoming;
+                    buffer += `data: ${incoming}`;
                 }
             }
         }

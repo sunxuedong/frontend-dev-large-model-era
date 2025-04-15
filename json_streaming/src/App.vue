@@ -82,7 +82,7 @@ const update = async () => {
           jsonParser.trace(delta);
         }
       } catch (ex) {
-        buffer += incoming;
+        buffer += `data: ${incoming}`;
       }
     }
   }
