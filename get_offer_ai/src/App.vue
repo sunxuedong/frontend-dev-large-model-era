@@ -1,80 +1,195 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { set, get } from 'jsonuri';
+import Timeline from './components/Timeline.vue';
+import ChatDisplay from './components/ChatDisplay.vue';
+import MessageInput from './components/MessageInput.vue';
+import type { Message } from './types';
 
-const question = ref('天空为什么是蓝色的？');
-const content = ref({
-  title: "",
-  overview: "",
-  outline: [],
-  content: [],
-});
+// 面试总时长（分钟）
+const totalDuration = ref(35);
+// 当前时间点（分钟）
+const currentTime = ref(0);
+// Timeline是否已启动
+const timelineStarted = ref(false);
+// 聊天消息列表
+const messages = ref<Message[]>([
+  {
+    id: 1,
+    sender: 'ai',
+    content: '您好，我是今天的面试官。请做个简单的自我介绍吧。',
+    timestamp: new Date()
+  }
+]);
 
-const update = async () => {
-  if (!question) return;
+// 更新当前时间点
+const updateTime = (time: number) => {
+  currentTime.value = time;
+};
 
-  const endpoint = '/api/stream';
+// 处理内容变化事件，启动Timeline
+const handleContentChange = () => {
+  if (!timelineStarted.value) {
+    timelineStarted.value = true;
+  }
+};
 
-  const eventSource = new EventSource(`${endpoint}?question=${question.value}`);
+const sessionId = Math.random().toString(36).slice(2, 9);
+
+// 发送新消息
+const sendMessage = async (content: string) => {
+  const newMessage: Message = {
+    id: messages.value.length + 1,
+    sender: 'user',
+    content,
+    timestamp: new Date()
+  };
+  
+  messages.value.push(newMessage);
+
+  const res = await fetch('/api/chat', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      message: newMessage.content,
+      sessionId,
+      timeline: currentTime.value
+    })
+  });
+
+  const { channel } = await res.json();
+
+  const eventSource = new EventSource(`/api/event?channel=${channel}`);
+  let aiResponse: Message = {
+    id: messages.value.length + 1,
+    sender: 'ai',
+    content: '',
+    timestamp: new Date()
+  };
   eventSource.addEventListener("message", function (e: any) {
     let { uri, delta } = JSON.parse(e.data);
-    const str = get(content.value, uri);
-    set(content.value, uri, (str || '') + delta);
+    if (aiResponse.content === '') {
+      aiResponse.content = delta;
+      messages.value.push(aiResponse);
+    } else {
+      aiResponse.content += delta;
+      messages.value = [...messages.value]; // 强制更新
+    }
+    console.log(uri, delta);
   });
   eventSource.addEventListener('finished', () => {
     console.log('传输完成');
     eventSource.close();
   });
-}
+  
+  // 模拟AI回复（在实际应用中，这里会调用后端API）
+  // setTimeout(() => {
+  //   const aiResponse: Message = {
+  //     id: messages.value.length + 1,
+  //     sender: 'ai',
+  //     content: `感谢您的回答。现在我们处于面试的第${Math.floor(currentTime.value)}分钟，继续下一个问题...`,
+  //     timestamp: new Date()
+  //   };
+  //   messages.value.push(aiResponse);
+  // }, 1000);
+};
 </script>
 
 <template>
-  <div class="container">
-    <div>
-      <label>输入：</label><input class="input" v-model="question" />
-      <button @click="update">提交</button>
+  <div class="interview-container">
+    <!-- 左侧时间轴 -->
+    <div class="timeline-section">
+      <Timeline 
+        :current-time="currentTime" 
+        :total-duration="totalDuration"
+        :started="timelineStarted"
+        @update-time="updateTime"
+      />
     </div>
-    <div class="output">
-      <!-- <textarea>{{ content }}</textarea> -->
-      <h1>{{ content.title }}</h1>
-      <p>{{ content.overview }}</p>
-      <div v-for="(item, i) in (content.outline as any)" :key="item.title + i">
-        <h2>{{ item.title }}</h2>
-        <p>{{ content.content[i] }}</p>
+    
+    <!-- 右侧聊天区域 -->
+    <div class="chat-section">
+      <div class="chat-header">
+        <h2>AI面试官</h2>
+        <div class="time-indicator">当前时间：{{ Math.floor(currentTime) }}分钟</div>
+      </div>
+      
+      <!-- 聊天显示区域 -->
+      <div class="chat-display-wrapper">
+        <ChatDisplay :messages="messages" @content-change="handleContentChange" />
+      </div>
+      
+      <!-- 消息输入区域 -->
+      <div class="message-input-wrapper">
+        <MessageInput @send-message="sendMessage" />
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.container {
+.interview-container {
+  display: flex;
+  height: 90vh;
+  max-width: 1920px;
+  width: 100%;
+  margin: 0 auto;
+  background-color: #f5f5f5;
+  overflow: hidden;
+}
+
+.timeline-section {
+  width: 180px;
+  height: 100%;
+  border-right: 1px solid #ddd;
+  background-color: #fff;
+}
+
+.chat-section {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: start;
-  justify-content: start;
-  height: 100vh;
-  font-size: .85rem;
+  height: 100%;
+  padding: 20px 30px;
 }
 
-.input {
-  width: 200px;
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
 }
 
-.output {
-  margin-top: 10px;
-  min-height: 300px;
-  width: 100%;
-  text-align: left;
+.chat-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #333;
 }
 
-button {
-  padding: 0 10px;
-  margin-left: 6px;
+.time-indicator {
+  padding: 6px 12px;
+  background-color: #646cff;
+  color: white;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 500;
 }
 
-textarea {
-  width: 300px;
-  height: 200px;
-  font-size: 10px;
+.chat-display-wrapper {
+  flex: 1;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  max-height: 60%;
+}
+
+.message-input-wrapper {
+  height: auto;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 </style>
