@@ -4,6 +4,9 @@ import { type ChatConfig, Ling } from "@bearbobo/ling";
 import { pipeline } from 'node:stream/promises';
 import bodyParser from 'body-parser';
 import { createEventChannel, getEventChannel } from './lib/service/eventChannel';
+import { getContext } from './lib/config/context.config';
+import { getInterviewMemory, updateInterviewMemory } from './lib/service/memory';
+import memoryPrompt from './lib/prompt/memory.prompt';
 
 dotenv.config({
     path: ['.env.local', '.env']
@@ -23,19 +26,69 @@ app.get('/', (req, res) => {
     res.send('Hello, World!');
 });
 
+const historyMap: Record<string, Array<string>> = {};
 
 app.post('/chat', async (req, res) => {
     const { message, sessionId, timeline } = req.body;
+
     const config = {
         model_name: modelName,
         api_key: apiKey,
         endpoint: endpoint,
         sse: true,
     };
+
+    historyMap[sessionId] = historyMap[sessionId] || [];
+    const histories = historyMap[sessionId];
+    histories.push(message);
+
+    const context = getContext(timeline);
+    const memory = getInterviewMemory(sessionId);
+
+
+    const memoryStr = `# memory
+
+${JSON.stringify(memory)}
+`;
+
     // ------- The work flow start --------
     const ling = new Ling(config);
-    const bot = ling.createBot();
+    const bot = ling.createBot('reply', {}, {
+        response_format: { type: "text" },
+    });
+
+
+    bot.addPrompt(context);
+    bot.addPrompt(memoryStr);
+
+    // 对话同时更新记忆
+    const memoryBot = ling.createBot('memory', {}, {
+        quiet: true,
+    });
+
+    memoryBot.addListener('inference-done', (content) => {
+        const memory = JSON.parse(content);
+        console.log('memory', memory);
+        updateInterviewMemory(sessionId, memory);
+    });
+
+    memoryBot.addPrompt(memoryPrompt, { memory: memoryStr });
+
+    memoryBot.chat(`# 历史对话内容
+
+## 提问
+${histories[histories.length - 2] || ''}
+
+## 回答
+${histories[histories.length - 1] || ''}
+
+请更新记忆`);
+
     bot.chat(message);
+
+    bot.addListener('inference-done', (content) => {
+        histories.push(content);
+    });
 
     ling.close();
 

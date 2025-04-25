@@ -29,7 +29,25 @@ export interface InterviewMemory {
   lastUpdateTime: number;
 }
 
-export function createInterviewMemory(sessionId: string): InterviewMemory {
+const interviewMemoryMap = new Map<string, InterviewMemory>();
+export function getInterviewMemory(sessionId: string): InterviewMemory {
+  let memory = interviewMemoryMap.get(sessionId);
+  if (!memory) {
+    memory = createInterviewMemory(sessionId);
+    interviewMemoryMap.set(sessionId, memory);
+  }
+  return memory;
+}
+
+export function updateInterviewMemory(sessionId: string, memory: InterviewMemory) {
+  interviewMemoryMap.set(sessionId, memory);
+}
+
+export function clearInterviewMemory(sessionId: string) {
+  interviewMemoryMap.delete(sessionId);
+}
+
+function createInterviewMemory(sessionId: string): InterviewMemory {
   return {
     sessionId,
     conversationIndex: 0,

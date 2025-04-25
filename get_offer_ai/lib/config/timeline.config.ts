@@ -9,7 +9,7 @@
   32 分钟以上 结束
 */
 
-interface TimelineStep {
+export interface TimelineStep {
   startTime: number;
   endTime: number;
   focus: string; // 聚焦的问题，例如项目、技术、代码、算法、非技术问题
@@ -26,7 +26,7 @@ export const timelineConfig: TimelineConfig = {
       startTime: 0,
       endTime: 3,
       focus: '自我介绍',
-      prompt: `当前在自我介绍阶段，你要求候选人自我介绍，内容包括：
+      prompt: `当前在自我介绍阶段，你要求候选人提供简历或者自我介绍，简历和介绍内容包括：
 1. 个人信息
 2. 教育背景
 3. 工作经历
@@ -34,7 +34,7 @@ export const timelineConfig: TimelineConfig = {
 5. 擅长的技术
 6. 自我评价
 
-你首先根据<memory>的信息，判断候选人是否完成了自我介绍，如果没有完成，你询问并收集候选人缺失的信息，以便于后续的面试。
+你首先根据<memory>的信息，判断候选人是否完成了介绍，如果没有完成，你询问并收集候选人缺失的信息，以便于后续的面试。
       `,
     }, {
       startTime: 3,
