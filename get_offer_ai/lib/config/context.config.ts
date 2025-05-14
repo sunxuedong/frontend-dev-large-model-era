@@ -19,13 +19,13 @@ function formatContextConfig(contextConfig: ContextConfig): string {
   return `# 基本原则
 ${contextConfig.basicRule}
 
-# 职位描述
-${contextConfig.jobDescription}
-
-# 角色和任务
+# 你是谁
 ${contextConfig.roleAndTask}
 
-# 当前面试时间
+# 你招聘的角色
+${contextConfig.jobDescription}
+
+# 当前面试阶段信息
 
 ## 当前时间（minutes)
 ${contextConfig.currentTimelineContext.currentTimeline}
@@ -36,7 +36,7 @@ ${contextConfig.currentTimelineContext.startTime}
 ## 结束时间（minutes)
 ${contextConfig.currentTimelineContext.endTime}
 
-## 聚焦问题
+## 当前应聚焦问题
 ${contextConfig.currentTimelineContext.focus}
 
 ## 当前阶段任务

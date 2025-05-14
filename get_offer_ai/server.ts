@@ -26,7 +26,7 @@ app.get('/', (req, res) => {
     res.send('Hello, World!');
 });
 
-const historyMap: Record<string, Array<string>> = {};
+const historyMap: Record<string, Array<{role: any, content: string}>> = {};
 
 app.post('/chat', async (req, res) => {
     const { message, sessionId, timeline } = req.body;
@@ -40,7 +40,7 @@ app.post('/chat', async (req, res) => {
 
     historyMap[sessionId] = historyMap[sessionId] || [];
     const histories = historyMap[sessionId];
-    histories.push(message);
+    histories.push({role: 'user', content: message});
 
     const context = getContext(timeline);
     const memory = getInterviewMemory(sessionId);
@@ -52,14 +52,18 @@ ${JSON.stringify(memory)}
 `;
 
     // ------- The work flow start --------
-    const ling = new Ling(config);
+    const ling = new Ling(config, {
+        max_tokens: 8192,
+    });
     const bot = ling.createBot('reply', {}, {
         response_format: { type: "text" },
     });
 
-
+    console.log('context', context);
     bot.addPrompt(context);
     bot.addPrompt(memoryStr);
+
+    bot.addHistory(histories.slice(-3))
 
     // 对话同时更新记忆
     const memoryBot = ling.createBot('memory', {}, {
@@ -77,17 +81,21 @@ ${JSON.stringify(memory)}
     memoryBot.chat(`# 历史对话内容
 
 ## 提问
-${histories[histories.length - 2] || ''}
+${histories[histories.length - 2]?.content || ''}
 
 ## 回答
-${histories[histories.length - 1] || ''}
+${histories[histories.length - 1]?.content || ''}
 
 请更新记忆`);
 
     bot.chat(message);
 
     bot.addListener('inference-done', (content) => {
-        histories.push(content);
+        histories.push({role: 'assistant', content});
+    });
+
+    bot.addListener('response', () => {
+        ling.sendEvent({event: 'response-finished'});
     });
 
     ling.close();
@@ -112,6 +120,30 @@ app.get('/event',  (req, res) => {
         console.log(ex);
         controller?.close();
     }
+});
+
+app.get('/voice-token', async (req, res) => {
+    const region = process.env.VITE_AZURE_SPEECH_REGION;
+    const key = process.env.VITE_AZURE_SPEECH_KEY;
+
+    const headers: any = {
+      'Ocp-Apim-Subscription-Key': key,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    }; 
+
+    const token = await (
+        await fetch(`https://${region}.api.cognitive.microsoft.com/sts/v1.0/issueToken`, {
+            method: 'POST',
+            headers,
+        })
+    ).text();
+
+    res.send({
+        data: {
+            token: token,
+            region: region,
+        }
+    });
 });
 
 // 启动服务器

@@ -36,7 +36,7 @@ const handleContentChange = () => {
 const sessionId = Math.random().toString(36).slice(2, 9);
 
 // 发送新消息
-const sendMessage = async (content: string) => {
+const sendMessage = async (content: string, buttonDisabled: any) => {
   const newMessage: Message = {
     id: messages.value.length + 1,
     sender: 'user',
@@ -77,6 +77,9 @@ const sendMessage = async (content: string) => {
       messages.value = [...messages.value]; // 强制更新
     }
     console.log(uri, delta);
+  });
+  eventSource.addEventListener('response-finished', () => {
+    buttonDisabled.value = false;
   });
   eventSource.addEventListener('finished', () => {
     console.log('传输完成');
