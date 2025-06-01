@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { marked } from 'marked';
+import { fetchEventSource } from '@microsoft/fetch-event-source';
 
 const question = ref('讲一个关于中国龙的故事');
 const rawContent = ref('');
@@ -28,55 +29,54 @@ const update = async () => {
   if (!question) return;
   rawContent.value = "思考中...";
 
-  const OLLAMA_API = import.meta.env.VITE_OLLAMA_API || 'http://localhost:11434';
-  const MODEL_NAME = import.meta.env.VITE_OLLAMA_MODEL;
+  const DIFY_API = import.meta.env.VITE_DIFY_API_URL || 'http://127.0.0.1/v1';
+  const API_KEY = import.meta.env.VITE_DIFY_API_KEY;
+  const WORKFLOW_ID = import.meta.env.VITE_DIFY_WORKFLOW_ID;
 
-  const endpoint = `${OLLAMA_API}/api/generate`;
+  const endpoint = `${DIFY_API}/workflows/run`;
   const headers = {
     'Content-Type': 'application/json',
+    'Authorization': `Bearer ${API_KEY}`,
   };
 
-  // console.log(question.value);
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers: headers,
-    body: JSON.stringify({
-      model: MODEL_NAME,
-      prompt: question.value,
-      stream: stream.value,
-    })
+  const body = JSON.stringify({
+    workflow_id: WORKFLOW_ID,
+    inputs: {
+      input: question.value,
+    },
+    response_mode: stream.value ? 'streaming' : 'blocking',
+    user: 'bearbobo',
   });
 
+  // console.log(question.value);
+
   if (stream.value) {
-    const reader = response.body?.getReader();
-    const decoder = new TextDecoder();
-    let done = false;
-    let buffer = '';
     rawContent.value = '';
-
-    while (!done) {
-      const { value, done: doneReading } = await (reader?.read() as Promise<{ value: any; done: boolean }>);
-      done = doneReading;
-      const chunkValue = buffer + decoder.decode(value);
-      buffer = '';
-
-      const lines = chunkValue.split('\n').filter(Boolean);
-
-      // console.log(lines); // for debugging
-
-      for (const line of lines) {
+    fetchEventSource(endpoint, {
+      method: 'POST',
+      headers,
+      body,
+      onmessage: (event) => {
         try {
-          const data = JSON.parse(line);
-          const delta = data.response;
-          if (delta) rawContent.value += delta;
-        } catch (ex) {
-          buffer += line;
+          if(!event.data) return;
+          const data = JSON.parse(event.data);
+          if(data.event === 'text_chunk') {
+            rawContent.value += data.data.text;
+          }
+        } catch (e) {
+          console.error(e, event.data);
         }
-      }
-    }
+      },
+    });
+
   } else {
-    const data = await response.json();
-    rawContent.value = data.response;
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers,
+      body,
+    });
+    const { data } = await response.json();
+    rawContent.value = data.outputs.text;
   }
 }
 </script>
