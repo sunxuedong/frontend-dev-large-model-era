@@ -4,8 +4,11 @@
   "description": "A TypeScript Node.js project for RAG demo",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "ask-your-lib": "dist/mcp/server.js"
+  },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && mkdir -p dist/llm/prompts && cp src/llm/prompts/*.md dist/llm/prompts/",
     "dev": "ts-node src/index.ts",
     "start": "node dist/index.js",
     "test": "jest",
@@ -15,7 +18,8 @@
     "lint:fix": "eslint src/**/*.ts tests/**/*.ts --fix",
     "format": "prettier --write src/**/*.ts tests/**/*.ts",
     "clean": "rm -rf dist",
-    "prebuild": "npm run clean"
+    "prebuild": "npm run clean",
+    "prepare": "pnpm run build && chmod +x dist/mcp/server.js"
   },
   "keywords": [
     "typescript",
@@ -44,7 +48,9 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.3",
     "ollama": "^0.5.16",
-    "vectra": "^0.11.1"
+    "vectra": "^0.11.1",
+    "zod": "^3.25.64"
   }
 }
