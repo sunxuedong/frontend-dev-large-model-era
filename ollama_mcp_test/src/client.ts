@@ -9,8 +9,8 @@ export async function createClient() {
   });
 
   const transport = new StdioClientTransport({
-    command: "ts-node",
-    args: ["src/server.ts"],
+    command: "npx",
+    args: ["tsx", "src/server.ts"],
   });
 
   try {

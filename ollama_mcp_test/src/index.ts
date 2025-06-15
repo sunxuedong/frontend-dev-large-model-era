@@ -4,8 +4,8 @@ import { createClient } from './client';
   const client = await createClient();
 
   const result = await client.callTool({
-    name:'add', 
-    arguments: { a: 1, b: 2 }
+    name:'node-version-detect', 
+    arguments: {  }
   });
 
   console.log(result, JSON.stringify(await client.listTools()));
